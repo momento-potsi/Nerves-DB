@@ -15,6 +15,29 @@ using namespace std;
 
 /* g++ -I/usr/include nerves.cpp -o nervesapp -I /usr/local/lib -lmysqlcppconn */
 
+class IManager
+{
+private:
+    
+public:
+    IManager(){}
+
+    virtual void showAll(std::string tableName); /* { SELECT * FROM << tableName << ; } */
+    virtual void
+};
+
+class NeuronManager /* conns, neurons */
+{
+private:
+    
+public:
+    NeuronManager()
+    {
+    }
+};
+class LayerManager{}; /* layers */
+class NeuralOperator{}; /* io, actions, receptors, internal changes/growth */
+
 /** Todo: polish functions and gear features to other tables */
 
 sql::Driver             *driver;
@@ -36,16 +59,17 @@ int main()
         con->setSchema("nerves");
 
         int option = 0;
-
-        while (option != 5) {
+        /* Todo: General table options -> show all, add, find by, adjust, insert, delete; */
+        /* Set input, map out, run network*/
+        while (option != 5)
+        {
             cout << "\n1. Add a neuron\n";
             cout << "2. Find neuron by ID\n";
             cout << "3. Find neurons by Layer\n";
             cout << "4. Show all neurons\n";
             cout << "5. Exit\n\n";
 
-            cout << "Choice: ";
-            cin >> option;
+            cout << "Choice: "; cin >> option;
 
             switch(option) {
                 case 1: insert(); break;
