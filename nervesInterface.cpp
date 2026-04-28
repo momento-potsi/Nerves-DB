@@ -71,7 +71,6 @@ int IManager::getNextId()
 }
 
 
-/* TODO: custom for neuron (each new insert must start full connections between layers), same for layers*/
 void IManager::insert()
 {
     /* Get the next available ID */
@@ -149,11 +148,45 @@ void IManager::insert()
 }
 
 void IManager::deleteById(int id) 
-{
+{   
+    switch(tableName) /* delete associated data first */
+    {
+        case GroupingType::ByReceptor: /* same process for receptors */
+        case GroupingType::ByNeuron: /* delete connections related to neuron */
+            mySQLObject.prep_stmt = mySQLObject.con->prepareStatement(
+                "DELETE FROM Connections WHERE FromId = " + to_string(id) + " OR ToId = " + to_string(id)
+            );
+            mySQLObject.prep_stmt->execute();
+            mySQLObject.prep_stmt = mySQLObject.con->prepareStatement(
+                "DELETE FROM Receptors WHERE NeuronId = " + to_string(id)
+            );
+            mySQLObject.prep_stmt->execute();
+            /* decrement neuron count */
+            mySQLObject.prep_stmt = mySQLObject.con->prepareStatement(
+                "SELECT LayerId FROM Neurons WHERE Id = " + to_string(id)
+            );
+            mySQLObject.res = mySQLObject.prep_stmt->executeQuery();
+            if (mySQLObject.res->next()) {
+                int layerId = mySQLObject.res->getInt("LayerId");
+                mySQLObject.prep_stmt = mySQLObject.con->prepareStatement(
+                    "UPDATE Layers SET NeuronCount = NeuronCount - 1 WHERE LayerId = " + to_string(layerId)
+                );
+                mySQLObject.prep_stmt->execute();
+            }
+            
+        break;
+        case GroupingType::ByLayer: /* delete neurons and connections related to layer */
+            /* switch to neuron table to find neurons, cascade delete connections related to each neuron, then delete layer */
+            tableName = GroupingType::ByNeuron; 
+            deleteById(id);
+            tableName = GroupingType::ByLayer;
+        break;
+        default: break;
+    }
+
     mySQLObject.prep_stmt = mySQLObject.con->prepareStatement(
         "DELETE FROM " + getTableName() + " WHERE " + getIdName() + " = " + to_string(id)
     );
-    
     mySQLObject.prep_stmt->execute();
 
     cout << "[Deletion completed].\n";

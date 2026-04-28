@@ -36,7 +36,7 @@ int main()
             switch(option) {
                 case 1: manager->insert(); break;
                 case 2: manager->findById(); break;
-                case 3: manager->findBy(); break;
+                case 3: manager->findWhere(); break;
                 case 4: manager->showAll(); break;
             }
         }
