@@ -137,7 +137,7 @@ void NeuronManager::viewParentConnections(int neuronId)
 {
     /* find all connections where the neuron is the destination */
     mySQLObject.prep_stmt = mySQLObject.con->prepareStatement(
-        "SELECT * FROM Neurons JOIN Connections WHERE Connections.ToId = " + to_string(neuronId)
+        "SELECT * FROM Neurons JOIN Connections ON Neurons.Id = Connections.FromId WHERE Connections.ToId = " + to_string(neuronId)
     );
     mySQLObject.res = mySQLObject.prep_stmt->executeQuery();
 

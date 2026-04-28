@@ -99,9 +99,10 @@ INSERT INTO Action (ActionName, Threshold, UniquePath, AssignedWeight) VALUES ('
 
 -- > Layers 
 INSERT INTO Layer (LayerId, LayerName, LayerFunction, NeuronCount) VALUES (0, 'Input Layer [IL]',  'MAPIN',  0);
-INSERT INTO Layer (LayerId, LayerName, LayerFunction, NeuronCount) VALUES (1, 'Hiden Layer [HL1]', 'ADD',    0);
+INSERT INTO Layer (LayerId, LayerName, LayerFunction, NeuronCount) VALUES (1, 'Hidden Layer [HL1]', 'ADD',    0);
 INSERT INTO Layer (LayerId, LayerName, LayerFunction, NeuronCount) VALUES (99, 'Output Layer [OL]', 'MAPOUT', 0);
-
+INSERT INTO Layer (LayerId, LayerName, LayerFunction, NeuronCount) VALUES (100, 'Empty Layer [HL2]', 'NIL',   0);
+INSERT INTO Layer (LayerId, LayerName, LayerFunction, NeuronCount) VALUES (101, 'Empty Layer [HL3]', 'NIL',   0);
 -- > Neurons (Intially set up for 10 neurons per 10 layers)
 INSERT INTO Neurons (Id, NeuronName, NeuronWeight, NeuronStatus, NeuronRole, LayerId) -- Input Neurons
             VALUES  (0, 'INPUT1',   10.0,         'INACTIVE',   'INPUT',    0);
@@ -127,7 +128,7 @@ INSERT INTO Receptors (NeuronId, Active, Sign, IO_Weight) VALUES (0, 0, 1, 10.0)
 INSERT INTO Receptors (NeuronId, Active, Sign, IO_Weight) VALUES (1, 0, 1, 10.0);
 INSERT INTO Receptors (NeuronId, Active, Sign, IO_Weight) VALUES (4, 0, 1, 10.0); -- Output neurons
 INSERT INTO Receptors (NeuronId, Active, Sign, IO_Weight) VALUES (5, 0, 1, 10.0);
-
+INSERT INTO Receptors (NeuronId, Active, Sign, IO_Weight) VALUES (2, 0, 1, 10.0); -- ?
 
 -- > Connections (only go forward through layers/network)
 INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 0, 2); -- Neuron0

@@ -23,6 +23,26 @@ static void connectManager(IManager& manager)
     manager.mySQLObject.con->setSchema("nerves");
 }
 
+static void promptChangeTable(IManager& manager)
+{
+    cout << "\n--- Change Active Table ---\n";
+    cout << "1. Neurons\n";
+    cout << "2. Layer\n";
+    cout << "3. Connections\n";
+    cout << "4. Actions\n";
+    cout << "5. Receptors\n";
+    cout << "Choice: ";
+    int tableOption = 0; cin >> tableOption;
+    switch (tableOption) {
+        case 1: manager.changeTable(GroupingType::ByNeuron); break;
+        case 2: manager.changeTable(GroupingType::ByLayer); break;
+        case 3: manager.changeTable(GroupingType::ByConnection); break;
+        case 4: manager.changeTable(GroupingType::ByAction); break;
+        case 5: manager.changeTable(GroupingType::ByReceptor); break;
+        default: cout << "Invalid table option. Table unchanged.\n"; break;
+    }
+}
+
 int main()
 {
     NeuronManager neuronManager;
@@ -41,14 +61,17 @@ int main()
 
             if (mainOption == 1) {
                 int neuronOption = 0;
-                while (neuronOption != 6) {
+                while (neuronOption != 9) {
                     cout << "\n--- Neuron Manager ---\n";
                     cout << "1. Add a neuron\n";
                     cout << "2. Find neuron by ID\n";
-                    cout << "3. Find neurons by Layer\n";
+                    cout << "3. Find neurons by Condition\n";
                     cout << "4. Show all neurons\n";
                     cout << "5. Manage neuron connections\n";
-                    cout << "6. Back\n";
+                    cout << "6. Print neuron count\n";
+                    cout << "7. Change active table\n";
+                    cout << "8. Adjust entry by ID\n";
+                    cout << "9. Back\n";
                     cout << "Choice: "; cin >> neuronOption;
 
                     switch (neuronOption) {
@@ -80,20 +103,27 @@ int main()
                                 cout << "Invalid connection option.\n";
                             }
                         } break;
-                        case 6: break;
+                        case 6: neuronManager.printCount(); break;
+                        case 7: promptChangeTable(neuronManager); break;
+                        case 8: neuronManager.adjustById(); break;
+                        case 9: break;
                         default: cout << "Invalid neuron option.\n"; break;
                     }
                 }
             } else if (mainOption == 2) {
                 int layerOption = 0;
-                while (layerOption != 6) {
+                while (layerOption != 10) {
                     cout << "\n--- Layer Manager ---\n";
                     cout << "1. View layers and neurons\n";
                     cout << "2. Set inputs\n";
                     cout << "3. Run layers\n";
                     cout << "4. Read outputs for a layer\n";
                     cout << "5. Show all layers/actions/receptors\n";
-                    cout << "6. Back\n";
+                    cout << "6. Print layer count\n";
+                    cout << "7. Change active table\n";
+                    cout << "8. Adjust entry by ID\n";
+                    cout << "9. View neurons grouped by actions\n";
+                    cout << "10. Back\n";
                     cout << "Choice: "; cin >> layerOption;
 
                     switch (layerOption)
@@ -105,7 +135,11 @@ int main()
                                 layerManager.readOutputs(layerId);
                         break;
                         case 5: layerManager.showAll(); break;
-                        case 6: break;
+                        case 6: layerManager.printCount(); break;
+                        case 7: promptChangeTable(layerManager); break;
+                        case 8: layerManager.adjustById(); break;
+                        case 9: neuronManager.showAllBy(GroupingType::ByAction); break;
+                        case 10: break;
                         default: cout << "Invalid layer option.\n"; break;
                     }
                 }

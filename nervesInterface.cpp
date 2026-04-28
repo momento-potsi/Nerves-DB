@@ -65,6 +65,14 @@ int IManager::getNextId()
     return 0;
 }
 
+void IManager::printCount()
+{
+    mySQLObject.stmt = mySQLObject.con->createStatement();
+    mySQLObject.res = mySQLObject.stmt->executeQuery("SELECT COUNT(*) AS Count FROM " + getTableName());
+    if (mySQLObject.res->next()) {
+        cout << "[Total entries in " << getTableName() << ": " << mySQLObject.res->getInt("Count") << "]\n" << endl;
+    }
+}
 
 void IManager::insert()
 {
@@ -190,7 +198,9 @@ void IManager::deleteById(int id)
 void IManager::findWhere()
 {
     string condition;
-    cout << "Enter condition for search (e.g. 'WHERE Id = 1'): "; cin >> condition;
+    cout << "Enter condition for search (e.g. 'WHERE Id = 1'): "; 
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    std::getline(cin, condition);
 
     mySQLObject.prep_stmt = mySQLObject.con->prepareStatement(
         "SELECT * FROM " + getTableName() + " " + condition

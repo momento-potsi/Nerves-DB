@@ -67,6 +67,7 @@ public:
     virtual void deleteById(int id); 
     /* @function: Update an entry in the table by Primary Key Id */
     virtual void adjustById(); 
+    virtual void printCount(); /* Print count of entries in current table */
 
     int    getNextId();
     string getIdName() {
