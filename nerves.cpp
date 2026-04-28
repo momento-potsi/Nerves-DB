@@ -23,7 +23,22 @@ static void connectManager(IManager& manager)
     manager.mySQLObject.con->setSchema("nerves");
 }
 
-static void promptChangeTable(IManager& manager)
+static IManager* getManagerForTable(NeuronManager& neuronManager, LayerManager& layerManager, GroupingType tableType)
+{
+    switch (tableType) {
+        case GroupingType::ByNeuron:
+        case GroupingType::ByConnection:
+            return &neuronManager;
+        case GroupingType::ByLayer:
+        case GroupingType::ByAction:
+        case GroupingType::ByReceptor:
+            return &layerManager;
+        default:
+            return &neuronManager;
+    }
+}
+
+static void promptChangeTable(IManager*& activeManager, NeuronManager& neuronManager, LayerManager& layerManager)
 {
     cout << "\n--- Change Active Table ---\n";
     cout << "1. Neurons\n";
@@ -33,54 +48,60 @@ static void promptChangeTable(IManager& manager)
     cout << "5. Receptors\n";
     cout << "Choice: ";
     int tableOption = 0; cin >> tableOption;
+    GroupingType selectedTable;
     switch (tableOption) {
-        case 1: manager.changeTable(GroupingType::ByNeuron); break;
-        case 2: manager.changeTable(GroupingType::ByLayer); break;
-        case 3: manager.changeTable(GroupingType::ByConnection); break;
-        case 4: manager.changeTable(GroupingType::ByAction); break;
-        case 5: manager.changeTable(GroupingType::ByReceptor); break;
-        default: cout << "Invalid table option. Table unchanged.\n"; break;
+        case 1: selectedTable = GroupingType::ByNeuron; break;
+        case 2: selectedTable = GroupingType::ByLayer; break;
+        case 3: selectedTable = GroupingType::ByConnection; break;
+        case 4: selectedTable = GroupingType::ByAction; break;
+        case 5: selectedTable = GroupingType::ByReceptor; break;
+        default:
+            cout << "Invalid table option. Table unchanged.\n";
+            return;
     }
+
+    activeManager = getManagerForTable(neuronManager, layerManager, selectedTable);
+    activeManager->changeTable(selectedTable);
 }
 
 int main()
 {
     NeuronManager neuronManager;
     LayerManager layerManager;
+    IManager* activeManager = &neuronManager;
 
     try {
         connectManager(neuronManager); connectManager(layerManager);
 
         int mainOption = 0;
-        while (mainOption != 3) {
+        while (mainOption != 9) {
             cout << "\n=== NERVES DB MENU ===\n";
+            cout << "Active table: " << activeManager->getTableName() << "\n";
             cout << "1. Neuron manager\n";
             cout << "2. Layer manager\n";
-            cout << "3. Exit\n";
+            cout << "3. Find by ID\n";
+            cout << "4. Find by condition\n";
+            cout << "5. Show all\n";
+            cout << "6. Print count\n";
+            cout << "7. Change active table\n";
+            cout << "8. Adjust entry by ID\n";
+            cout << "9. Exit\n";
             cout << "Choice: "; cin >> mainOption;
 
             if (mainOption == 1) {
                 int neuronOption = 0;
-                while (neuronOption != 9) {
+                while (neuronOption != 3) {
                     cout << "\n--- Neuron Manager ---\n";
                     cout << "1. Add a neuron\n";
-                    cout << "2. Find neuron by ID\n";
-                    cout << "3. Find neurons by Condition\n";
-                    cout << "4. Show all neurons\n";
-                    cout << "5. Manage neuron connections\n";
-                    cout << "6. Print neuron count\n";
-                    cout << "7. Change active table\n";
-                    cout << "8. Adjust entry by ID\n";
-                    cout << "9. Back\n";
+                    cout << "2. Manage neuron connections\n";
+                    cout << "3. Back\n";
                     cout << "Choice: "; cin >> neuronOption;
 
                     switch (neuronOption) {
-                        case 1: neuronManager.insert(); break;
-                        case 2: neuronManager.findById(); break;
-                        case 3: neuronManager.findWhere(); break;
-                        case 4: neuronManager.showAll(); break;
-                        case 5: { 
-                            
+                        case 1:
+                            neuronManager.insert();
+                            break;
+                        case 2: {
                             cout << "\n1. Connect neurons\n";
                             cout << "2. Disconnect neurons\n";
                             cout << "3. View parent connections\n";
@@ -103,47 +124,58 @@ int main()
                                 cout << "Invalid connection option.\n";
                             }
                         } break;
-                        case 6: neuronManager.printCount(); break;
-                        case 7: promptChangeTable(neuronManager); break;
-                        case 8: neuronManager.adjustById(); break;
-                        case 9: break;
-                        default: cout << "Invalid neuron option.\n"; break;
+                        case 3:
+                            break;
+                        default:
+                            cout << "Invalid neuron option.\n";
+                            break;
                     }
                 }
             } else if (mainOption == 2) {
                 int layerOption = 0;
-                while (layerOption != 10) {
+                while (layerOption != 5) {
                     cout << "\n--- Layer Manager ---\n";
                     cout << "1. View layers and neurons\n";
                     cout << "2. Set inputs\n";
                     cout << "3. Run layers\n";
                     cout << "4. Read outputs for a layer\n";
-                    cout << "5. Show all layers/actions/receptors\n";
-                    cout << "6. Print layer count\n";
-                    cout << "7. Change active table\n";
-                    cout << "8. Adjust entry by ID\n";
-                    cout << "9. View neurons grouped by actions\n";
-                    cout << "10. Back\n";
+                    cout << "5. Back\n";
                     cout << "Choice: "; cin >> layerOption;
 
-                    switch (layerOption)
-                    {
-                        case 1: layerManager.viewLayers(0); break;
-                        case 2: layerManager.setInputs(); break;
-                        case 3: layerManager.runLayers(); break;
-                        case 4: cout << "Layer ID: "; int layerId; cin >> layerId;
-                                layerManager.readOutputs(layerId);
-                        break;
-                        case 5: layerManager.showAll(); break;
-                        case 6: layerManager.printCount(); break;
-                        case 7: promptChangeTable(layerManager); break;
-                        case 8: layerManager.adjustById(); break;
-                        case 9: neuronManager.showAllBy(GroupingType::ByAction); break;
-                        case 10: break;
-                        default: cout << "Invalid layer option.\n"; break;
+                    switch (layerOption) {
+                        case 1:
+                            layerManager.viewLayers(0);
+                            break;
+                        case 2:
+                            layerManager.setInputs();
+                            break;
+                        case 3:
+                            layerManager.runLayers();
+                            break;
+                        case 4: {
+                            cout << "Layer ID: "; int layerId; cin >> layerId;
+                            layerManager.readOutputs(layerId);
+                        } break;
+                        case 5:
+                            break;
+                        default:
+                            cout << "Invalid layer option.\n";
+                            break;
                     }
                 }
             } else if (mainOption == 3) {
+                activeManager->findById();
+            } else if (mainOption == 4) {
+                activeManager->findWhere();
+            } else if (mainOption == 5) {
+                activeManager->showAll();
+            } else if (mainOption == 6) {
+                activeManager->printCount();
+            } else if (mainOption == 7) {
+                promptChangeTable(activeManager, neuronManager, layerManager);
+            } else if (mainOption == 8) {
+                activeManager->adjustById();
+            } else if (mainOption == 9) {
                 break;
             } else {
                 cout << "Invalid menu option.\n";
