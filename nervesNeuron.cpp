@@ -85,12 +85,14 @@ string NeuronManager::getStatementOrdering(GroupingType type)
             stmt += " FROM Neurons JOIN Connections ON Neurons.Id = Connections.FromId ORDER BY Connections.ToId";
         break;
         case GroupingType::ByAction: /* Group by action's unique path in neurons */
+        {
             stmt += " Neurons.Id, NeuronName, NeuronWeight, NeuronStatus, NeuronRole, ActionName, UniquePath";
             stmt += " FROM Neurons JOIN Action WHERE Neurons.Id IN ("; /* "#, "*/
-            mySQLObject.res = mySQLObject.stmt->executeQuery("SELECT UniquePath FROM Action"); /* get unique path */
-            while (mySQLObject.res->next()) 
+            sql::Statement* local_stmt = mySQLObject.con->createStatement();
+            sql::ResultSet* local_res = local_stmt->executeQuery("SELECT UniquePath FROM Action");
+            while (local_res->next()) 
             {
-                string path = to_string(mySQLObject.res->getInt("UniquePath"));
+                string path = to_string(local_res->getInt("UniquePath"));
                 for (size_t i = 0; i < path.length(); i++) { /* Each integer (id) in the path */
                     stmt += to_string(path[i]); 
                     if(path.length() != i + 1) { /* omit last comma */
@@ -99,6 +101,9 @@ string NeuronManager::getStatementOrdering(GroupingType type)
                 }
             }
             stmt += ")";
+            delete local_res;
+            delete local_stmt;
+        }
         break;
         case GroupingType::ByReceptor: 
             stmt = "SELECT * FROM Neurons JOIN Receptors ON NeuronId = Id";
@@ -109,6 +114,45 @@ string NeuronManager::getStatementOrdering(GroupingType type)
     }
 
     return stmt;
+}
+
+void NeuronManager::connect(int srcId, int destId)
+{
+    changeTable(GroupingType::ByConnection);
+    insert(); /* insert connection into connection table */
+    changeTable(GroupingType::ByNeuron);
+}
+
+void NeuronManager::disconnect(int srcId, int destId)
+{
+    changeTable(GroupingType::ByConnection);
+    mySQLObject.prep_stmt = mySQLObject.con->prepareStatement(
+        "DELETE FROM Connections WHERE FromId = " + to_string(srcId) + " AND ToId = " + to_string(destId)
+    );
+    mySQLObject.prep_stmt->execute();
+    changeTable(GroupingType::ByNeuron);
+}
+
+void NeuronManager::viewParentConnections(int neuronId)
+{
+    /* find all connections where the neuron is the destination */
+    mySQLObject.prep_stmt = mySQLObject.con->prepareStatement(
+        "SELECT * FROM Neurons JOIN Connections WHERE Connections.ToId = " + to_string(neuronId)
+    );
+    mySQLObject.res = mySQLObject.prep_stmt->executeQuery();
+
+    std::cout << "\n|> [Displaying Entry from: `" << getTableName() << "` Table]\n\n";
+    string border = "";
+    while (mySQLObject.res->next()) {
+        string line = getEntryString(); /* get Class specific implementation */       
+        if (border.length() == 0) {
+            border = line.length() > 0 ? string(line.length() - 2, '-') : "";
+            border = " " + border + " ";
+            std::cout << border << endl;
+        }
+        std::cout << line << endl;    
+    }
+    std::cout << border << endl;   
 }
 
 /* TODO: do functions for tables not covered by default tables () */

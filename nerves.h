@@ -14,6 +14,11 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <string>
+
+using namespace std;
+
+
 
 struct SQLHelper { /* struct to group SQL objects, use through one of Managers */
     sql::Driver             *driver;
@@ -79,9 +84,9 @@ public:
     {
         switch (tableName) {
             case GroupingType::ByNeuron:     return "Neurons";
-            case GroupingType::ByLayer:      return "Layers";
+            case GroupingType::ByLayer:      return "Layer";
             case GroupingType::ByConnection: return "Connections";
-            case GroupingType::ByAction:     return "Actions";
+            case GroupingType::ByAction:     return "Action";
             case GroupingType::ByReceptor:   return "Receptors";
             default:                         return "NULL";
         }
@@ -95,10 +100,11 @@ public:
     IManager() { cout << "\n|> [Accessed Working Table: `" << getTableName() << "`]\n"; }
 
     virtual ~IManager() {
-        if(mySQLObject.con != nullptr)       delete mySQLObject.con;
-        if(mySQLObject.stmt != nullptr)      delete mySQLObject.stmt;
+        /*if(mySQLObject.prep_stmt != nullptr) delete mySQLObject.prep_stmt;
         if(mySQLObject.res != nullptr)       delete mySQLObject.res;
-        if(mySQLObject.prep_stmt != nullptr) delete mySQLObject.prep_stmt;
+        if(mySQLObject.stmt != nullptr)      delete mySQLObject.stmt;
+        if(mySQLObject.con != nullptr)       delete mySQLObject.con;
+        */
     }
 
 };
@@ -123,8 +129,12 @@ public:
 
 class LayerManager: public IManager /* layers (IO, actions), processing/functions */
 {
+private:
+    void simulateActivation();
+
 public:
     string getEntryString() override;
+    string getStatementOrdering(GroupingType type) override;
     /* todo private layer functions */
     void processLayer();
     void runLayers(); 
@@ -135,6 +145,6 @@ public:
 
     LayerManager() {
         tableName = GroupingType::ByLayer;
-        cout << "\n|> [Accessed Working Table: `" << getTableName() << "`]\n";
+        std::cout << "\n|> [Accessed Working Table: `" << getTableName() << "`]\n";
     }
 };

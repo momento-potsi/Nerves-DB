@@ -3,11 +3,6 @@
 
 using namespace std;
 
-string padToLength(const string& str, size_t minLength) {
-    if (str.length() >= minLength) return str;
-    return str + string(minLength - str.length(), ' ');
-}
-
 void IManager::showAllBy(GroupingType type) 
 {
     mySQLObject.stmt = mySQLObject.con->createStatement();
@@ -97,7 +92,7 @@ void IManager::insert()
             cout << "Enter Layer Function: "; cin >> s2;
             cout << "Enter Layer ID (if connection is between layers): "; cin >> i3;
             mySQLObject.prep_stmt = mySQLObject.con->prepareStatement(
-                "INSERT INTO Layers (LayerId, LayerName, LayerFunction, NeuronCount) "
+                "INSERT INTO Layer (LayerId, LayerName, LayerFunction, NeuronCount) "
                 "VALUES (" + to_string(i3) + ", " + s1 + ", " + s2 + ", 0)"
             );
         break;
@@ -169,7 +164,7 @@ void IManager::deleteById(int id)
             if (mySQLObject.res->next()) {
                 int layerId = mySQLObject.res->getInt("LayerId");
                 mySQLObject.prep_stmt = mySQLObject.con->prepareStatement(
-                    "UPDATE Layers SET NeuronCount = NeuronCount - 1 WHERE LayerId = " + to_string(layerId)
+                    "UPDATE Layer SET NeuronCount = NeuronCount - 1 WHERE LayerId = " + to_string(layerId)
                 );
                 mySQLObject.prep_stmt->execute();
             }
