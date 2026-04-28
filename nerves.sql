@@ -110,35 +110,34 @@ INSERT INTO Neurons (Id, NeuronName, NeuronWeight, NeuronStatus, NeuronRole, Lay
 UPDATE Layer SET NeuronCount = 2 WHERE LayerId = 0;
 
 INSERT INTO Neurons (Id, NeuronName, NeuronWeight, NeuronStatus, NeuronRole, LayerId) -- Layer 1 Neurons
-            VALUES  (10, 'HL1 Neuron', 10.0,       'INACTIVE',   'PROCESS',  1);
+            VALUES  (2, 'HL1 Neuron', 10.0,       'INACTIVE',   'PROCESS',  1);
 INSERT INTO Neurons (Id, NeuronName, NeuronWeight, NeuronStatus, NeuronRole, LayerId)
-            VALUES  (11, 'HL2 Neuron', 10.0,       'INACTIVE',   'PROCESS',  1);
+            VALUES  (3, 'HL2 Neuron', 10.0,       'INACTIVE',   'PROCESS',  1);
 UPDATE Layer SET NeuronCount = 2 WHERE LayerId = 1;
 
 INSERT INTO Neurons (Id, NeuronName, NeuronWeight, NeuronStatus, NeuronRole, LayerId) -- Output Neurons
-            VALUES  (98, 'OUTPUT2',   10.0,        'INACTIVE',   'OUTPUT',   99); -- Map to `Reinforcement` action
+            VALUES  (4, 'OUTPUT2',   10.0,        'INACTIVE',   'OUTPUT',   99); -- Map to `Reinforcement` action
 INSERT INTO Neurons (Id, NeuronName, NeuronWeight, NeuronStatus, NeuronRole, LayerId)
-            VALUES  (99, 'OUTPUT1',   10.0,        'INACTIVE',   'OUTPUT',   99); -- Map to `Punishment` action
+            VALUES  (5, 'OUTPUT1',   10.0,        'INACTIVE',   'OUTPUT',   99); -- Map to `Punishment` action
 UPDATE Layer SET NeuronCount = 2 WHERE LayerId = 99;
 
 -- > Receptors
 -- >  > Active (0 - false, 1 - true), Sign (1 -> +, -1 -> -)
 INSERT INTO Receptors (NeuronId, Active, Sign, IO_Weight) VALUES (0, 0, 1, 10.0); -- Input neurons
 INSERT INTO Receptors (NeuronId, Active, Sign, IO_Weight) VALUES (1, 0, 1, 10.0);
-INSERT INTO Receptors (NeuronId, Active, Sign, IO_Weight) VALUES (98, 0, 1, 10.0); -- Output neurons
-INSERT INTO Receptors (NeuronId, Active, Sign, IO_Weight) VALUES (99, 0, 1, 10.0);
+INSERT INTO Receptors (NeuronId, Active, Sign, IO_Weight) VALUES (4, 0, 1, 10.0); -- Output neurons
+INSERT INTO Receptors (NeuronId, Active, Sign, IO_Weight) VALUES (5, 0, 1, 10.0);
 
 
 -- > Connections (only go forward through layers/network)
-INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 0, 10); -- Neuron0
-INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 0, 11);
-INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 1, 10); -- Neuron1
-INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 1, 11);
-INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 10, 98); -- Neuron10
-INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 10, 99);
-INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 11, 98); -- Neuron11
-INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 11, 99);
-
+INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 0, 2); -- Neuron0
+INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 0, 3);
+INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 1, 2); -- Neuron1
+INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 1, 3);
+INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 2, 4); -- Neuron2
+INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 2, 5);
+INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 3, 4); -- Neuron3
+INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('NEURON', 3, 5);
 INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('LAYER', 0, 1); -- Layers
 INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('LAYER', 1, 99);
 
@@ -155,4 +154,6 @@ INSERT INTO Connections (ConnectionType, FromId, ToId) VALUES ('LAYER', 1, 99);
     SELECT * FROM Receptors;
     describe Action;
     SELECT * FROM Action;
+
+    SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM information_schema.columns WHERE table_schema = 'nerves';
 */
